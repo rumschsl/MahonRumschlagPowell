@@ -1,0 +1,179 @@
+Data Dictionary for BioData Data Sets at http://aquatic.biodata.usgs.gov
+downloaded on: 20201028.1839
+
+===================================
+FILE: 20201028.1839.taxon
+===================================
+
+Taxonomy Domain Data Set Description
+-------------------------------------------------------------
+List of taxa in the BioData Taxonomy Domain. Fish and Invertebrate domains 
+contain all columns in the BioData system, and therefore columns are not 
+necessarily applicable for all communities (fish, invertebrates, algae). 
+The algae domain is a subset of relevant columns
+
+
+Column Definitions
+------------------
+
+Column: BenchTaxonName
+Description: The taxon name assigned by a taxonomist in the lab (at the 
+"bench") or in the field. May be a conditional, provisional, or operational 
+name. Serves as root name for crosswalks to other taxonomic systems
+
+Column: BenchTaxonNameReferenceCode
+Description: Code for the reference having the taxonomic description of 
+BenchName. In combination with BenchName it forms a composite logical key 
+that uniquely identifies a Taxon Concept
+
+Column: TaxonConceptState
+Description: Field that determines if a taxon concept (combination of 
+BenchTaxonName and BenchTaxonNameReferenceCode) will be accepted in data 
+upload
+Domain
+    * Current: considered up-to-date and will be accepted in data
+    * Deprecated: accepted in data but may be rejected in the near future,
+      and may be reported under a different name in data retrievals
+    * Retired: retired from use and will be rejected if used for incoming
+      data
+
+Column: BiologicalCommunity
+Description: Taxon membership in one of the following: Fish, Invertebrate, 
+Algae
+
+Column: AlgalGroup
+Description: Taxon membership (algae only) in one of the following: 
+Blue-Green Algae; Brown Algae; Cryptophytes; Diatoms; Dinoflagellates; 
+Euglenoids; Green Algae; Red Algae; Unknown Phyla; Yellow-Green Algae; Red 
+Algae; Yellow-Green Algae; Green Algae; Blue-Green Algae; Unknown Phyla; 
+Euglenoids; Cryptophytes; Dinoflagellates
+
+Column: BenchTaxonProvisional
+Description: Indicates if taxon conforms to ICZN or ICBN standards (yes, 
+no)
+
+Column: BenchTaxonHybrid
+Description: "Yes" indicates taxon is a hybrid
+
+Column: BU_ID
+Description: Identifier used in USGS National Water Quality Lab, Biological 
+Unit
+
+Column: NADED_ID
+Description: North American Diatom Ecological Database ID; master list of 
+names maintained by the Academy of Natural Sciences of Drexel University; 
+http://diatom.acnatsci.org/ <http://diatom.acnatsci.org/>
+
+Column: BioDataTaxonName
+Description: Taxon according to BioData current taxonomic system
+
+Column: BioDataCommonName
+Description: Common or vernacular name of taxon
+
+Column: BioDataShortName
+Description: Short, coded version of a TaxonName useful for column headers 
+in a table or when graphing
+
+Column: BioDataTaxonProvisional
+Description: Indicates if taxon conforms to ICZN or ICBN standards (yes, 
+no)
+
+Column: BioDataTaxonHybrid
+Description: "Yes" indicates taxon is a hybrid
+
+Column: PublishedTaxonName
+Description: The "nearest" TaxonName that has been published following 
+International Commission of Zoological Nomenclature (ICZN) for inverts and 
+fish or International Code of Botanical Nomenclature (ICBN) for algae, 
+convention; authority is not included. Provisional names cannot be used in 
+this field
+
+Column: PublishedTaxonNameAuthority
+Description: Taxonomic authority for HierarchyTaxonName
+
+Column: ITIS_TSN
+Description: Integrated Taxonomic Information System (ITIS) Taxonomic 
+Serial Number (TSN). A TSN is a unique, persistent, non-intelligent 
+identifier for a scientific name in the context of ITIS <
+http://www.itis.gov <http://www.itis.gov/> >
+
+Column: ITIS_MatchCode
+Description: How well the PublishedName corresponds to the ITIS name <
+http://www.itis.gov <http://www.itis.gov/> > represented by the ITIS_TSN
+
+Column: PublishedSortOrder
+Description: Numeric code used to sort data according to taxonomic order
+
+Column: PublishedTaxonLevel
+Description: The taxonomic rank of the HierarchyTaxonName (e.g. Phylum, 
+Class, Order, Genus, etc.)
+
+Column: ScientificName
+Description: Complete name of the Taxon, with Authority
+
+Column: Phylum
+Description: Taxonomic Phylum name
+
+Column: Subphylum
+Description: Taxonomic subphylum name
+
+Column: Superclass
+Description: Taxonomic Class
+
+Column: Class
+Description: Taxonomic Class
+
+Column: Subclass
+Description: Taxonomic subclass name
+
+Column: Infraclass
+Description: Taxonomic infraclass name
+
+Column: Superorder
+Description: Taxonomic Superorder name
+
+Column: Order
+Description: Taxonomic Order name
+
+Column: Suborder
+Description: Taxonomic suborder name
+
+Column: Infraorder
+Description: Taxonomic infraorder name
+
+Column: Superfamily
+Description: Taxonomic Superfamily name
+
+Column: Family
+Description: Taxonomic Family
+
+Column: Subfamily
+Description: Taxonomic subfamily name
+
+Column: Tribe
+Description: Taxonomic Tribe name
+
+Column: Genus
+Description: Taxonomic Genus name
+
+Column: Subgenus
+Description: Taxonomic genus name
+
+Column: Species
+Description: Taxonomic species name
+
+Column: Subspecies
+Description: Taxonomic subspecies name
+
+Column: Variety
+Description: Taxonomic variety name
+
+Column: Form
+Description: Taxonomic form name
+
+Column: TaxonVersionNumber
+Description: Version of the taxonomic system represented in the retrieval 
+dataset. BioData maintains separate Taxonomic Systems for each community 
+(fish, invertebrate, algae) to manage taxonomic data
+
+
