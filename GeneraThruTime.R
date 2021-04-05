@@ -1,6 +1,10 @@
 library(tidyverse)
 library(StreamData)
 
+#
+# MAKE PLOTS OF OCCURENCES OF GENERA THORUGH TIME
+# 
+
 ##Got an error when abunMeasure = "abundance", Mahon updated the 'StreamData'
 ##R package on 3/30/21; you'll need to update it from Github for this function
 ##to work.
@@ -67,35 +71,51 @@ for(i in 1:28) {
          width = 10, height = 6, units = "in")
 }
 
-####Taxa names
-taxnames = read.csv("C:/Users/mikem/Documents/Research/USGS Stream Macros/MahonRumschlagPowell/20201028.1839.taxon_INVERT.csv",
+#
+# INSPECT CHANGES IN TAXONOMY THROUGH TIME
+#
+
+##Import taxonomic names dataset
+setwd("/Users/samantharumschlag/Documents/PowellCenter/Code/MahonRumschlagPowell")
+taxnames = read.csv("20201028.1839.taxon_INVERT.csv",
                     fileEncoding="UTF-8-BOM")
 
+##Make a dataset of taxa that include genus, species, or subspecies-level information 
 gen_taxnames = taxnames %>%
-  filter(Genus != "") %>%
-  filter(BiologicalCommunity == "Invertebrates") %>%
-  dplyr::select(BenchTaxonName, TaxonConceptState,
-                BiodataTaxonName, PublishedTaxonName, Genus)
+  filter(Genus != "") %>% ##remove info at the subfamily or greater, keep genus, species, subspecies
+  filter(BiologicalCommunity == "Invertebrates") %>% ##select only intertebrates, just in case
+  dplyr::select(BenchTaxonName, TaxonConceptState, ##select columns with pertinent info
+                PublishedTaxonName, Genus) ##Genus here is genus from PublishedTaxonName
+
+##Note: TaxonConceptState doesn't seem to be very helpful. Observations exist in which
+## TaxonConceptState is "current" but BenchTaxonName is not the same as PublishedTaxonName
 
 taxnames %>%
   filter(BenchTaxonName == "Probezzia")
 
-##Generate the unique Bench Genera names (outdated) that do not match the updated Genera names
-BenchGenera = unique((gen_taxnames %>% 
+##Generate a list that is all the possibly problematic genera names
+## The list is the unique genus-level BenchTaxonNames from gen_taxnames
+BenchGenera = unique(
+  (gen_taxnames %>% 
   mutate(BenchGenus = gsub( " .*$", "", gen_taxnames$BenchTaxonName )) %>%
-  filter(BenchGenus != Genus))$BenchGenus)
+  filter(BenchGenus != Genus)) #keep rows in which BenchGenus does not match Genus from PublishedTaxonName
+  $BenchGenus #keep only BenchGenus column
+  ) 
 
-##Generate a list of the outdated Genera names and the matching updated Genera names
+##Generate a list of the outdated Genera names (from BenchTaxonName) and the 
+##matching updated Genera names (from PublishedTaxonName)
+
 ##Remove all outdated Genera names that only have a single updated genus name
-##  These genera are not problematic, because individually, these outdated genera
-##  will be completely renamed with a single updated genus.
-##The problem genera are those that have 1+ updated genera names AND
-##  their outdated genera names are included in the updated genera names
+##These genera are not problematic, because we will rely on genus ID's from
+##PublishedTaxonName (i.e. "Old Genus Name" (from BenchTaxonName) is 
+## always "New Genus Name" (from PublishedTaxonName))
+
+##The problem genera are those that are associated with >1 updated genera names 
 ##  For example, Baetis was updated and was moved into 13 (!) genera:
-##    Acentrella, Acerpenna, Baetisca, Callibaetis, Diphetor, Drunella, 
-##    Ephemerella, Fallceon, Heterocloeon, Hexagenia, Labiobaetis, Plauditus,
-##    AND Baetis!!! So, all observations that are at the genus level and are
-##    "Baetis", need to be dealt with. There are 48 genera of these problem taxa
+##  Acentrella, Acerpenna, Baetisca, Callibaetis, Diphetor, Drunella, 
+##  Ephemerella, Fallceon, Heterocloeon, Hexagenia, Labiobaetis, Plauditus,
+##  AND Baetis!!! So, all observations that are at the genus level and are
+##  "Baetis", need to be dealt with. There are 48 genera of these problem taxa
 ##    that we will need to deal with. BUT, not all of these are found in the 
 ##    final dataset and it may not be as problematic as once thought.
 
@@ -107,13 +127,81 @@ GeneraListProblems <- gen_taxnames %>%
   slice(1) %>%
   group_by(BenchGenus) %>%
   mutate(BenchGenusToNewGenera = n()) %>%
-  filter(BenchGenusToNewGenera > 1)
+  filter(BenchGenusToNewGenera > 1) %>%
+  mutate(BenchGenusInNawqa = ifelse(BenchGenus %in% unique(invertslong$Genus),
+                                    "Y",
+                                    "N"),
+         PublishedGenusInNawqa = ifelse(Genus %in% unique(invertslong$Genus),
+                                    "Y",
+                                    "N")) 
 
-View(GeneraListProblems)
+#generate table for use in package
+GeneraListProblems <- GeneraListProblems[,1:2]
 
-length(unique(c(GeneraListProblems$Genus, GeneraListProblems$BenchGenus)))
 
-length(unique(GeneraListProblems$Genus))
-length(unique(GeneraListProblems$BenchGenus))
+#get list of unique BenchGenus & Genus, sort alphabetically
+unqAllGn = sort(unique(c(GeneraListProblems$BenchGenus,
+                         as.character(GeneralListProblems$Genus))))  
+
+#create a column that is the pairwise combos of BenchGenus and PublishedTaxon Genus
+GeneraListProblems$BenchGenus_Genus = paste(GeneraListProblems$BenchGenus, GeneraListProblems$Genus, sep= "_")
+
+#make output df to store all pairwise relationships among all genera
+pairwiseDF <- data.frame(matrix(ncol = length(unqAllGn), nrow = length(unqAllGn)))
+colnames(pairwiseDF) <- unqAllGn
+rownames(pairwiseDF) <- unqAllGn
+
+#loop through unqBnchGn
+for( i in 1:length(unqAllGn)){
+  #web is the web of genera names that correspond to given genus
+  #Search for each unique BenchGenus & match to BenchGenus_Genus. 
+  #For each match, get the BenchGenus & Genus and put into a single vector
+  web <- c(GeneraListProblems$BenchGenus[grep(unqAllGn[i], GeneraListProblems$BenchGenus_Genus)],
+         as.character(GeneraListProblems$Genus)[grep(unqAllGn[i], GeneraListProblems$BenchGenus_Genus)])
+
+  #get unique observation of web
+  webo <- sort(unique(web))
+
+  #store pairwise relationships, "1" is a match
+  pairwiseDF[i,] <- ifelse(colnames(pairwiseDF) %in% webo, 1, 0)
+  }
+
+#use graph theory to generate non-overlapping groups based on pairwiseDF
+n = nrow(pairwiseDF)
+
+#install.packages("igraph")
+library(igraph)
+
+## Make graph of how genera are connected
+same <- which(pairwiseDF==1)
+topology <- data.frame(N1=((same-1) %% n) + 1, N2=((same-1) %/% n) + 1)
+topology <- topology[order(topology[[1]]),] # Get rid of loops and ensure right naming of vertices
+g3 <- simplify(graph.data.frame(topology,directed = FALSE))
+get.data.frame(g3)
+
+# Plot graph
+plot(g3)
+
+#get clusters and membership information for each cluster
+clust <- clusters(g3, mode="weak")$membership
+
+#make a df with appropriate names for groups
+clust <- data.frame(num = 1:98, group = clust, genus = unqAllGn)
+
+#create label for "lumping"
+#split list
+clust_list <- split(clust, clust$group)
+ 
+for( i in 1:length(clust_list)){
+  clust_list[[i]]$lump <- paste(clust_list[[i]]$genus, collapse = "/")
+ }
+ 
+clust_labels <- do.call(rbind,clust_list)
+
+setwd("/Users/samantharumschlag/Documents/PowellCenter/Code/MahonRumschlagPowell")
+write.csv(clust_labels, "clust_labels.csv")
+
+
+
 
 
